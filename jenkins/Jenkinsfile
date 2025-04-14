@@ -1,9 +1,5 @@
 pipeline {
-    agent {
-        docker {
-            image 'maven:3.8.7-eclipse-temurin-17'
-        }
-    }
+    agent any
     options {
         skipStagesAfterUnstable()
     }
@@ -23,17 +19,9 @@ pipeline {
                 }
             }
         }
-        stage('Deliver') {
+        stage('Deliver') { 
             steps {
-                sh './jenkins/scripts/deliver.sh'
-            }
-            post {
-                success {
-                    echo 'Delivery completed!'
-                }
-                failure {
-                    echo 'Delivery failed!'
-                }
+                sh './jenkins/scripts/deliver.sh' 
             }
         }
     }
