@@ -1,51 +1,25 @@
 pipeline {
-    agent {
-        docker {
-            image 'maven:3.9.9-eclipse-temurin-17'  // Using Maven Docker image
-            args '-v /var/jenkins_home:/var/jenkins_home'  // Persist Jenkins home
-        }
+    agent any
+    parameters {
+        string(defaultValue: "name", description: "deployment name?", name: "choice3")  // Corrected the syntax
+        choice(choices: ["TEST", "Dev", "QA", "PRE-PROD", "PROD"], description: "Which az?", name: "deployEnv")
+        booleanParam(defaultValue: false, description: "Enable service?", name: "myBoolean")
     }
     stages {
-        stage('Checkout') {
+        stage("stage1") {
             steps {
-                checkout scm  // Checkout code from Git repository
+                echo "string is set to: ${params.choice3}\n"
             }
         }
-
-        stage('Build') {
+        stage("stage2") {
             steps {
-                script {
-                    // Running Maven build with clean and package
-                    sh 'mvn -B -DskipTests clean package'
-                }
+                echo "booleanParam is set to: ${params.myBoolean}\n"
             }
         }
-
-        stage('Test') {
+        stage("stage3") {
             steps {
-                script {
-                    // Run tests (this step is skipped if the build fails)
-                    sh 'mvn test'
-                }
+                echo "choice is set to: ${params.deployEnv}\n"  // Fixed the escape sequence for newline
             }
-        }
-
-        stage('Deliver') {
-            steps {
-                script {
-                    // Delivery steps (e.g., Docker image push or deploy)
-                    echo "Delivery step is skipped for this example"
-                }
-            }
-        }
-    }
-
-    post {
-        success {
-            echo 'Build completed successfully!'
-        }
-        failure {
-            echo 'Build failed!'
         }
     }
 }
