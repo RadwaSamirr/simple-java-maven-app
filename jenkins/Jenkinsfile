@@ -1,39 +1,51 @@
 pipeline {
-    agent any
-    options {
-        skipStagesAfterUnstable()
+    agent {
+        docker {
+            image 'maven:3.9.9-eclipse-temurin-17'  // Using Maven Docker image
+            args '-v /var/jenkins_home:/var/jenkins_home'  // Persist Jenkins home
+        }
     }
     stages {
+        stage('Checkout') {
+            steps {
+                checkout scm  // Checkout code from Git repository
+            }
+        }
+
         stage('Build') {
             steps {
-                sh 'mvn -B -DskipTests clean package'
-            }
-        }
-        stage('Test') {
-            steps {
-                sh 'mvn test'
-            }
-        }
-            post {
-                always {
-                    junit 'target/surefire-reports/*.xml'
+                script {
+                    // Running Maven build with clean and package
+                    sh 'mvn -B -DskipTests clean package'
                 }
             }
-        
-        stage('Deliver') { 
+        }
+
+        stage('Test') {
             steps {
-                sh './jenkins/scripts/deliver.sh' 
+                script {
+                    // Run tests (this step is skipped if the build fails)
+                    sh 'mvn test'
+                }
             }
         }
-         stage('Deliver') { 
+
+        stage('Deliver') {
             steps {
-                sh './jenkins/scripts/deliver.sh' 
+                script {
+                    // Delivery steps (e.g., Docker image push or deploy)
+                    echo "Delivery step is skipped for this example"
+                }
             }
-        } 
-        stage('complete') { 
-            steps {
-                echo"job complete" 
-            }
+        }
+    }
+
+    post {
+        success {
+            echo 'Build completed successfully!'
+        }
+        failure {
+            echo 'Build failed!'
         }
     }
 }
